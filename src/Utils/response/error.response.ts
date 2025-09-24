@@ -28,6 +28,16 @@ export class NotFoundException extends ApplicationException {
         super(message, 404, options);
     }
 }
+export class UnAuthorizedException extends ApplicationException {
+    constructor(message: string, options?: ErrorOptions) {
+        super(message, 401, options);
+    }
+}
+export class ForbiddenException extends ApplicationException {
+    constructor(message: string, options?: ErrorOptions) {
+        super(message, 403, options);
+    }
+}
 
 export const globalErrorHandler = 
 (err: IError, req : Request, res: Response, next: NextFunction) => {

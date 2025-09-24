@@ -44,9 +44,10 @@ class AuthenticationService {
             throw new error_response_1.NotFoundException('invalid Account');
         if (!(0, hash_1.compareHashing)(password, user.password))
             throw new error_response_1.BadRequestException('invalid password');
-        const accessToken = await (0, token_1.generateToken)({ payload: { _id: user._id } });
+        const criedentials = await (0, token_1.createLoginCredentials)(user);
         return res.status(200).json({
-            message: ' User Loged in Successfully'
+            message: ' User Loged in Successfully',
+            criedentials
         });
     };
     confirmeEmail = async (req, res) => {

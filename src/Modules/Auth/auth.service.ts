@@ -6,7 +6,8 @@ import { UserRepository } from '../../DB/reposetories/user.repository';
 import { compareHashing, generateHashing } from '../../Utils/security/hash';
 import { emailEvent } from '../../Utils/events/email.event';
 import { generateOTP } from '../../Utils/generateOTP';
-import { generateToken } from '../../Utils/security/token';
+import { createLoginCredentials } from '../../Utils/security/token';
+
 
 
 class AuthenticationService {
@@ -44,7 +45,6 @@ class AuthenticationService {
         return res.status(201).json({message : ' User Created Successfully', user})
     }
 
-
     logIn = async (req : Request ,res : Response) : Promise <Response> => {
         const { email, password } = req.body;
 
@@ -56,11 +56,12 @@ class AuthenticationService {
         if(!compareHashing(password, user .password)) 
             throw new BadRequestException('invalid password')
 
-        const accessToken = await generateToken({payload : {_id : user._id}})
+        const criedentials = await createLoginCredentials(user)
         
 
         return res.status(200).json({
-            message : ' User Loged in Successfully'
+            message : ' User Loged in Successfully', 
+            criedentials
         })
     }
 
