@@ -11,6 +11,7 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
+const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
 const error_response_1 = require("./Utils/response/error.response");
 const connection_1 = __importDefault(require("./DB/connection"));
 (0, dotenv_1.config)({ path: node_path_1.default.resolve('./config/.env.dev') });
@@ -32,6 +33,7 @@ const bootstrap = async () => {
         return res.status(200).json({ message: ' hello from express with typescript' });
     });
     app.use('/api/auth', auth_controller_1.default);
+    app.use('/api/user', user_controller_1.default);
     app.use(error_response_1.globalErrorHandler);
     app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 };
