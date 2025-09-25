@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express"
 import { BadRequestException, ForbiddenException} from "../Utils/response/error.response"
 import { decodeToken, TokenEnum } from "../Utils/security/token"
-import { RoulEnum } from "../DB/Models/model.user"
+import { RoulEnum } from "../DB/Models/User.model"
 
 
 export const authentication = (accesRoles: RoulEnum[] =[], tokenType : TokenEnum = TokenEnum.ACCESS ) => {

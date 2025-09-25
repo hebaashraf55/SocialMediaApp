@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { ISignUpDTO } from './auth.dto';
-import { UserModel } from '../../DB/Models/model.user';
+import { UserModel } from '../../DB/Models/User.model';
 import {  BadRequestException, ConfilectException, NotFoundException } from '../../Utils/response/error.response';
 import { UserRepository } from '../../DB/reposetories/user.repository';
 import { compareHashing, generateHashing } from '../../Utils/security/hash';

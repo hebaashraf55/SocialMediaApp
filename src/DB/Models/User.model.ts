@@ -43,7 +43,7 @@ export const userSchema = new Schema<IUser>({
 
     password : { type : String, required : true },
     resetPassword : String ,
-    changeCridentialsTime : String ,
+    changeCridentialsTime : Date ,
 
     phone : String ,
     address :  String ,

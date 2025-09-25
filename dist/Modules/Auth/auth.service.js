@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const model_user_1 = require("../../DB/Models/model.user");
+const User_model_1 = require("../../DB/Models/User.model");
 const error_response_1 = require("../../Utils/response/error.response");
 const user_repository_1 = require("../../DB/reposetories/user.repository");
 const hash_1 = require("../../Utils/security/hash");
@@ -8,7 +8,7 @@ const email_event_1 = require("../../Utils/events/email.event");
 const generateOTP_1 = require("../../Utils/generateOTP");
 const token_1 = require("../../Utils/security/token");
 class AuthenticationService {
-    _userModel = new user_repository_1.UserRepository(model_user_1.UserModel);
+    _userModel = new user_repository_1.UserRepository(User_model_1.UserModel);
     constructor() { }
     signUp = async (req, res) => {
         const { userName, email, password } = req.body;
