@@ -7,7 +7,7 @@ const error_response_1 = require("../response/error.response");
 const user_repository_1 = require("../../DB/reposetories/user.repository");
 const uuid_1 = require("uuid");
 const token_model_1 = require("../../DB/Models/token.model");
-const Token_repository_1 = require("../../DB/reposetories/Token.repository");
+const token_repository_1 = require("../../DB/reposetories/token.repository");
 var SignatureLevelEnum;
 (function (SignatureLevelEnum) {
     SignatureLevelEnum["ADMIN"] = "ADMIN";
@@ -85,7 +85,7 @@ const createLoginCredentials = async (user) => {
 exports.createLoginCredentials = createLoginCredentials;
 const decodeToken = async ({ authorization, tokenType = TokenEnum.ACCESS }) => {
     const userModel = new user_repository_1.UserRepository(User_model_1.UserModel);
-    const tokenModel = new Token_repository_1.TokenRepository(token_model_1.TokenModel);
+    const tokenModel = new token_repository_1.TokenRepository(token_model_1.TokenModel);
     const [bearer, token] = authorization.split(' ');
     if (!bearer || !token)
         throw new error_response_1.UnAuthorizedException("Missing Authorization Header");
@@ -105,13 +105,13 @@ const decodeToken = async ({ authorization, tokenType = TokenEnum.ACCESS }) => {
     });
     if (!user)
         throw new error_response_1.UnAuthorizedException("Not Register Account");
-    if (user.changeCridentialsTime.getTime() || 0 > decoded.iat * 1000)
+    if (user.changeCridentialsTime?.getTime() || 0 > decoded.iat * 1000)
         throw new error_response_1.UnAuthorizedException("Invalid Or Old Login Credentials");
     return { user, decoded };
 };
 exports.decodeToken = decodeToken;
 const createRevokeToken = async (decoded) => {
-    const tokenModel = new Token_repository_1.TokenRepository(token_model_1.TokenModel);
+    const tokenModel = new token_repository_1.TokenRepository(token_model_1.TokenModel);
     const [result] = await tokenModel.create({
         data: [
             { jti: decoded?.jti,

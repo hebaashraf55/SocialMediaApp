@@ -22,7 +22,7 @@ export interface IUser {
 
     password : string;
     resetPassword : string;
-    changeCridentialsTime: string;
+    changeCridentialsTime: Date;
 
     phone ?: string;
     address ?: string;
@@ -43,7 +43,7 @@ export const userSchema = new Schema<IUser>({
 
     password : { type : String, required : true },
     resetPassword : String ,
-    changeCridentialsTime : Date ,
+    changeCridentialsTime : Date, 
 
     phone : String ,
     address :  String ,

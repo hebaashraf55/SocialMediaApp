@@ -9,8 +9,8 @@ import { JwtPayload } from 'jsonwebtoken';
 
 class UserService {
     private _userModel = new UserRepository(UserModel)
-    constructor() {}
 
+    constructor() {}
 
        getProfile = async (req : Request, res : Response, next : NextFunction) :Promise<Response> => {
 
@@ -20,7 +20,6 @@ class UserService {
         logOut = async (req : Request, res : Response) : Promise<Response> => {
             const {flag} : ILogOutDTO = req.body;
             let statusCode = 200;
-
             const update : UpdateQuery<IUser> = {};
 
             switch (flag) {
@@ -28,7 +27,6 @@ class UserService {
                     update.changeCridentialsTime = new Date()
                     break;
                 case logOutEnum.only:
-                    // create revoke token
                      await createRevokeToken(req.decoded as JwtPayload)
                  statusCode = 201
                     break;
@@ -46,6 +44,11 @@ class UserService {
             await createRevokeToken(req.decoded as JwtPayload)
             return res.status(201).json({message : ' Done', data : credentials})
         }
+
+        
+
+
+
     }
 
 export default new UserService;

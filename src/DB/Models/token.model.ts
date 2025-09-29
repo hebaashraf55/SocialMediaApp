@@ -1,7 +1,5 @@
 import { model, Types, Schema, models, HydratedDocument } from 'mongoose';
 
-
-
 export interface IToken { 
     jti : string,
     expiresIn : number,

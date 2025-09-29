@@ -7,6 +7,8 @@ const hash_1 = require("../../Utils/security/hash");
 const email_event_1 = require("../../Utils/events/email.event");
 const generateOTP_1 = require("../../Utils/generateOTP");
 const token_1 = require("../../Utils/security/token");
+const s3_config_1 = require("../../Utils/multer/s3.config");
+const cluod_multer_1 = require("../../Utils/multer/cluod.multer");
 class AuthenticationService {
     _userModel = new user_repository_1.UserRepository(User_model_1.UserModel);
     constructor() { }
@@ -78,6 +80,23 @@ class AuthenticationService {
         return res.status(200).json({
             message: ' User Email Confirmed Successfully'
         });
+    };
+    profileImage = async (req, res) => {
+        const { ContentType, Originalname } = req.body;
+        const { url, Key } = await (0, s3_config_1.createPreSignedURL)({
+            path: `users/${req.decoded?._id}`,
+            ContentType,
+            Originalname
+        });
+        return res.status(200).json({ message: ' Profile Image Uploaded Successfully', url, Key });
+    };
+    coverImage = async (req, res) => {
+        const urls = await (0, s3_config_1.uploadFiles)({
+            storageApproch: cluod_multer_1.StorageEnum.DISK,
+            files: req.files,
+            path: `users/${req.decoded?._id}/cover`
+        });
+        return res.status(200).json({ message: ' Cover Images Uploaded Successfully', urls });
     };
 }
 exports.default = new AuthenticationService;

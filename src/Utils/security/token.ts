@@ -4,7 +4,7 @@ import { BadRequestException, UnAuthorizedException } from "../response/error.re
 import { UserRepository } from "../../DB/reposetories/user.repository";
 import { v4 as uuid } from "uuid";
 import { TokenModel } from "../../DB/Models/token.model";
-import { TokenRepository } from "../../DB/reposetories/Token.repository";
+import { TokenRepository } from "../../DB/reposetories/token.repository";
 
 export enum SignatureLevelEnum {
     ADMIN = 'ADMIN',
@@ -123,6 +123,7 @@ export const decodeToken = async ({ authorization, tokenType = TokenEnum.ACCESS 
     })
     if(!decoded?._id || !decoded.iat)
         throw new UnAuthorizedException("Invalid Token Payload") 
+     
     if(await tokenModel.findOne({filter : {jti : decoded.jti}}))
         throw new UnAuthorizedException("Invalid Or Old Login Credentials") 
 
@@ -131,14 +132,14 @@ export const decodeToken = async ({ authorization, tokenType = TokenEnum.ACCESS 
     })
     if(!user) throw new UnAuthorizedException("Not Register Account")
 
-    if(user.changeCridentialsTime.getTime() || 0  > decoded.iat * 1000)
+    if(user.changeCridentialsTime?.getTime() || 0  > decoded.iat * 1000)
         throw new UnAuthorizedException("Invalid Or Old Login Credentials")
 
     return {user,decoded}
 
 }
 
-export const createRevokeToken = async ( decoded:JwtPayload) => {
+export const createRevokeToken = async ( decoded : JwtPayload) => {
     const tokenModel = new TokenRepository(TokenModel)
     const [ result ] =await tokenModel.create({
         data: [

@@ -7,6 +7,8 @@ import { compareHashing, generateHashing } from '../../Utils/security/hash';
 import { emailEvent } from '../../Utils/events/email.event';
 import { generateOTP } from '../../Utils/generateOTP';
 import { createLoginCredentials } from '../../Utils/security/token';
+import { createPreSignedURL, uploadFiles} from '../../Utils/multer/s3.config';
+import { StorageEnum } from '../../Utils/multer/cluod.multer';
 
 
 
@@ -97,6 +99,41 @@ class AuthenticationService {
             message : ' User Email Confirmed Successfully'
         })
     }
+
+    profileImage = async (req : Request ,res : Response) : Promise <Response> => {
+
+        // const key = await uploadFile({
+        //     file : req.file as Express.Multer.File, 
+        //     path : `users/${req.decoded?._id}`
+        // });
+
+        // const key = await uploadLargeFile({
+        //     file : req.file as Express.Multer.File, 
+        //     path : `users/${req.decoded?._id}`
+        // });
+        const { ContentType , Originalname } : { ContentType: string, Originalname: string} = req.body;
+
+        const { url , Key } = await createPreSignedURL({
+            path : `users/${req.decoded?._id}`,
+            ContentType ,
+            Originalname
+        })
+
+        return res.status(200).json({message : ' Profile Image Uploaded Successfully', url , Key})
+    }
+
+
+    coverImage = async (req : Request ,res : Response) : Promise <Response> => {
+
+        const urls = await uploadFiles({
+            storageApproch : StorageEnum.DISK,
+            files : req.files as Express.Multer.File[], 
+            path : `users/${req.decoded?._id}/cover`
+        });
+
+        return res.status(200).json({ message : ' Cover Images Uploaded Successfully', urls })
+    }
+
 }
 
 export default new AuthenticationService;
