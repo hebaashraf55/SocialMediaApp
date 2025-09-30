@@ -1,4 +1,4 @@
-import { GetObjectCommand, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"; // upload any file
+import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, GetObjectCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"; // upload any file
 import { StorageEnum } from "./cluod.multer";
 import { v4 as uuid } from 'uuid';
 import { createReadStream } from "node:fs";
@@ -119,7 +119,7 @@ export const createPreSignedURL  = async ({
     ContentType : string,
     Originalname : string,
     expiresIn ?: number
-}) => {
+}) : Promise<{url : string ; Key: string}> => {
     const command = new PutObjectCommand({
         Bucket,
         Key : `${process.env.APPLICATION_NAME}/${path}/${uuid()}-presigned-${Originalname}`,
@@ -169,11 +169,48 @@ export const getFile = async ({
 } : {
         Bucket?: string,
         Key : string,
-}) => {
+}) : Promise<GetObjectCommandOutput> => {
     const command = new GetObjectCommand({
         Bucket,
         Key
     })
     return await s3Config().send(command);
 
+}
+
+// delete file
+export const deleteFile = async ({ 
+    Bucket = process.env.AWS_BUCKET_NAME as string, 
+    Key ,
+} : {
+        Bucket?: string,
+        Key : string,
+}) : Promise<GetObjectCommandOutput> => {
+    const command = new DeleteObjectCommand({
+        Bucket,
+        Key
+    })
+    return await s3Config().send(command);
+
+}
+
+// delete files
+export const deleteFiles = async ({ 
+    Bucket = process.env.AWS_BUCKET_NAME as string, 
+    urls ,
+    Quiet = false,
+} : {
+        Bucket?: string,
+        urls : string[],
+        Quiet ?: boolean
+}) : Promise<GetObjectCommandOutput> => {
+    const Objects = urls.map((url) => { return {Key : url} })
+    const command = new DeleteObjectsCommand({
+        Bucket,
+        Delete : {
+            Objects,
+            Quiet
+        }
+    })
+    return await s3Config().send(command);
 }

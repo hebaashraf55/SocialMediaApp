@@ -18,6 +18,7 @@ const connection_1 = __importDefault(require("./DB/connection"));
 const s3_config_1 = require("./Utils/multer/s3.config");
 const node_util_1 = require("node:util");
 const node_stream_1 = require("node:stream");
+const User_model_1 = require("./DB/Models/User.model");
 const createS3WriteStreamPipe = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -35,6 +36,20 @@ const bootstrap = async () => {
     await (0, connection_1.default)();
     app.get('/users', (req, res) => {
         return res.status(200).json({ message: ' hello from express with typescript' });
+    });
+    app.get('/test-s3', async (req, res) => {
+        const { Key } = req.query;
+        const results = await (0, s3_config_1.deleteFile)({ Key: Key });
+        return res.status(200).json({ message: ' Done', results });
+    });
+    app.get('/test', async (req, res) => {
+        const results = await (0, s3_config_1.deleteFiles)({
+            urls: [
+                'Social APP/users/68d46e15ca2014640a8b8f38/cover/164a00a4-4d7a-4dd9-b11c-051f4278712c-photo2.jpg',
+                'Social APP/users/68d46e15ca2014640a8b8f38/cover/36a2bd9f-ee9f-460d-bece-8dd64f347837-WhatsApp Image 2024-05-15 at 1.15.01 AM.jpeg',
+            ]
+        });
+        return res.status(200).json({ message: ' Done', results });
     });
     app.get('/upload/pre-sign/*path', async (req, res) => {
         const { downloadName, download } = req.query;
@@ -61,6 +76,19 @@ const bootstrap = async () => {
         }
         return await createS3WriteStreamPipe(s3Response.Body, res);
     });
+    try {
+        const user = new User_model_1.UserModel({
+            userName: 'test test',
+            email: `${Date.now()}@gmail.com`,
+            password: "heba@123"
+        });
+        await user.save();
+        user.lastName = "heba";
+        await user.save();
+    }
+    catch (err) {
+        console.log(err);
+    }
     app.use('/api/auth', auth_controller_1.default);
     app.use('/api/user', user_controller_1.default);
     app.use(error_response_1.globalErrorHandler);

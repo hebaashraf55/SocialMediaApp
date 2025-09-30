@@ -10,9 +10,10 @@ import authRouter from './Modules/Auth/auth.controller';
 import userRouter from './Modules/User/user.controller';
 import { BadRequestException, globalErrorHandler } from './Utils/response/error.response';
 import connectDB  from './DB/connection'
-import { createGetPreSignedURL, getFile } from './Utils/multer/s3.config';
+import { createGetPreSignedURL, deleteFile, deleteFiles, getFile } from './Utils/multer/s3.config';
 import { promisify } from 'node:util';
 import { pipeline } from 'node:stream';
+import { UserModel } from './DB/Models/User.model';
 const createS3WriteStreamPipe = promisify(pipeline);
 
 
@@ -39,6 +40,26 @@ export const bootstrap = async () : Promise<void> => {
     app.get('/users', (req : Request , res : Response) => {
         return res.status(200).json({message : ' hello from express with typescript'})
     })
+
+    // delete file
+    app.get('/test-s3', async (req : Request , res : Response) => {
+        const {Key} = req.query as {Key : string};
+        const results = await deleteFile({ Key : Key as string })
+        return res.status(200).json({message: ' Done', results})
+    })
+    
+    // delete all files
+    app.get('/test', async (req : Request , res : Response) => {
+        const results = await deleteFiles({
+            urls : [
+                'Social APP/users/68d46e15ca2014640a8b8f38/cover/164a00a4-4d7a-4dd9-b11c-051f4278712c-photo2.jpg',
+                'Social APP/users/68d46e15ca2014640a8b8f38/cover/36a2bd9f-ee9f-460d-bece-8dd64f347837-WhatsApp Image 2024-05-15 at 1.15.01 AM.jpeg',
+
+            ]
+        })
+        return res.status(200).json({message: ' Done', results})
+    })
+
 
     app.get('/upload/pre-sign/*path', async (req : Request , res : Response) => {
         const { downloadName , download } = req.query as { downloadName : string , download : string };
@@ -72,6 +93,20 @@ export const bootstrap = async () : Promise<void> => {
         
     })
 
+
+
+    try{
+        const user = new UserModel({
+            userName : 'test test',
+            email : `${Date.now()}@gmail.com`,
+            password : "heba@123"
+        })
+        await user.save()
+        user.lastName = "heba"
+        await user.save()
+    } catch(err) {
+        console.log(err)
+    }
 
 
 

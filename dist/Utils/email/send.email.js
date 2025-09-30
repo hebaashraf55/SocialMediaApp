@@ -17,5 +17,6 @@ const sendEmail = async (data) => {
         ...data,
         from: `'Route Academy' <${process.env.EMAIL}>`,
     });
+    console.log(info.messageId);
 };
 exports.sendEmail = sendEmail;

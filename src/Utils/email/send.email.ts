@@ -22,5 +22,7 @@ export const sendEmail = async (data: Mail.Options) : Promise <void> => {
         ...data,
          from : `'Route Academy' <${process.env.EMAIL}>`,
     });
+    console.log(info.messageId);
+    
     
 }
