@@ -1,8 +1,7 @@
 import { model, Types, Schema, models, HydratedDocument } from 'mongoose';
-import { string } from 'zod';
-import { BadRequestException } from '../../Utils/response/error.response';
 import { generateHashing } from '../../Utils/security/hash';
 import { emailEvent } from '../../Utils/events/email.event';
+
 
 
 export enum GenderEnum {
@@ -69,6 +68,7 @@ export const userSchema = new Schema<IUser>({
 },);
 
 
+// excute before Hook
 userSchema
 .virtual("userName")
 .set(function (value:string){
@@ -79,33 +79,35 @@ userSchema
     return `${this.firstName} ${this.lastName}`
 })
 
-userSchema.pre('validate', function(next) {
-    console.log('Pre Hook :', this);
-    if(!this.slug?.includes('-')){
-        throw new BadRequestException('Slug is requierd and must hold - like ex : first-name-last-name')
-    }
-    next()
-})
-// userSchema.post('validate', function(doc,next) {
-//     console.log('Post Hook :' , doc);
-//      next()
-// })
-userSchema.pre('save', async function(this : HUserDocument & { wasNew: boolean },next) {
+
+userSchema.pre('save', async function(
+    this: HUserDocument & {wasNew: boolean, confirmEmailPlainOTP ?: string},
+    next) {
+
     this.wasNew = this.isNew;
-    console.log(this.wasNew);
     if(this.isModified('password')) {
-      this.password = await generateHashing(this.password)
+        this.password = await generateHashing(this.password)
+    }
+    if(this.isModified('confirmEmailOTP')) {
+        this.confirmEmailPlainOTP = this.confirmEmailOTP as string 
+        this.confirmEmailOTP = await generateHashing(this.confirmEmailOTP as string)
     }
     next()
 })
 
-userSchema.post('save', function(doc,next) {
-    const that = this as HUserDocument & {wasNew : boolean}
-    console.log(that.wasNew);
-    if(that.wasNew){
-         emailEvent.emit('confirmeEmail', { to : this.email, otp: 123456 })
-       }
+userSchema.post('save', async function(doc,next){
+    const that = this as HUserDocument & {wasNew: boolean, confirmEmailPlainOTP ?: string}
+    if( that.wasNew && that.confirmEmailPlainOTP ) {
+            emailEvent.emit('confirmeEmail', 
+        {   to: this.email, 
+            userName : this.userName, 
+            otp : that.confirmEmailPlainOTP
+        })
+    }
+    next()
 })
+
+
 
 export const UserModel = models.User || model<IUser>('User', userSchema)
 

@@ -4,7 +4,6 @@ const User_model_1 = require("../../DB/Models/User.model");
 const error_response_1 = require("../../Utils/response/error.response");
 const user_repository_1 = require("../../DB/reposetories/user.repository");
 const hash_1 = require("../../Utils/security/hash");
-const email_event_1 = require("../../Utils/events/email.event");
 const generateOTP_1 = require("../../Utils/generateOTP");
 const token_1 = require("../../Utils/security/token");
 const s3_config_1 = require("../../Utils/multer/s3.config");
@@ -26,15 +25,14 @@ class AuthenticationService {
                 {
                     userName,
                     email,
-                    password: await (0, hash_1.generateHashing)(password),
-                    confirmEmailOTP: await (0, hash_1.generateHashing)(String(otp))
+                    password,
+                    confirmEmailOTP: `${otp}`
                 }
             ],
             options: {
                 validateBeforeSave: true
             }
         });
-        email_event_1.emailEvent.emit('confirmeEmail', { to: email, userName: userName, otp });
         return res.status(201).json({ message: ' User Created Successfully', user });
     };
     logIn = async (req, res) => {

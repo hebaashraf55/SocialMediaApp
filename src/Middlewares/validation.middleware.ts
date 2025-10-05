@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { ZodError, ZodType } from 'zod';
 import { BadRequestException } from '../Utils/response/error.response';
 import z from 'zod';
+import { Types } from 'mongoose';
 
 
 type ReqTypeKey = keyof Request;
@@ -18,6 +19,14 @@ export const validation = (schema:SchemaType) => {
         }> = [];
         for (const key of Object.keys(schema) as ReqTypeKey[]) {
             if(!schema[key]) continue;
+            
+        if(req.file){
+                req.body.attachments = req.file;
+         }
+         if(req.files){
+            req.body.attachments = req.files;
+         }
+
 
         const validationResults = schema[key].safeParse(req[key]);
         if (!validationResults.success) {
@@ -53,4 +62,23 @@ export const generalField = {
         confirmPassword : z.string({error : "Confirm Password must be string"}),
         otp : z.string().regex(/^\d{6}/),
 
+        file : function ( mimetype : string[] ) {
+            return z.
+            strictObject({
+                fieldname: z.string(),
+                originalname: z.string(),
+                encoding: z.string(),
+                mimetype: z.string(),
+                buffer: z.any().optional(),
+                path: z.string().optional(),
+                size: z.number(),
+                })
+        .refine(
+        (data) => { return data.buffer || data.path } , {error : "Please provide a file"}
+        );
+            },
+
+        id : z.string().refine((data)=> {
+            return Types.ObjectId.isValid(data);
+        },{ error : "Invalid Tag id" })
 }

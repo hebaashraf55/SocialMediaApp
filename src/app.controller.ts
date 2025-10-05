@@ -8,12 +8,12 @@ import rateLimit , {type RateLimitRequestHandler} from 'express-rate-limit';
 config({ path: path.resolve('./config/.env.dev')});
 import authRouter from './Modules/Auth/auth.controller';
 import userRouter from './Modules/User/user.controller';
+import postRouter from './Modules/Post/post.controller';
 import { BadRequestException, globalErrorHandler } from './Utils/response/error.response';
 import connectDB  from './DB/connection'
 import { createGetPreSignedURL, deleteFile, deleteFiles, getFile } from './Utils/multer/s3.config';
 import { promisify } from 'node:util';
 import { pipeline } from 'node:stream';
-import { UserModel } from './DB/Models/User.model';
 const createS3WriteStreamPipe = promisify(pipeline);
 
 
@@ -94,24 +94,9 @@ export const bootstrap = async () : Promise<void> => {
     })
 
 
-
-    try{
-        const user = new UserModel({
-            userName : 'test test',
-            email : `${Date.now()}@gmail.com`,
-            password : "heba@123"
-        })
-        await user.save()
-        user.lastName = "heba"
-        await user.save()
-    } catch(err) {
-        console.log(err)
-    }
-
-
-
     app.use('/api/auth', authRouter);
     app.use('/api/user', userRouter);
+    app.use('/api/post', postRouter);
 
 
     app.use(globalErrorHandler);

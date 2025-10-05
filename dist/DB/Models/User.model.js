@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = exports.userSchema = exports.RoulEnum = exports.GenderEnum = void 0;
 const mongoose_1 = require("mongoose");
-const error_response_1 = require("../../Utils/response/error.response");
 const hash_1 = require("../../Utils/security/hash");
 const email_event_1 = require("../../Utils/events/email.event");
 var GenderEnum;
@@ -47,26 +46,25 @@ exports.userSchema
     .get(function () {
     return `${this.firstName} ${this.lastName}`;
 });
-exports.userSchema.pre('validate', function (next) {
-    console.log('Pre Hook :', this);
-    if (!this.slug?.includes('-')) {
-        throw new error_response_1.BadRequestException('Slug is requierd and must hold - like ex : first-name-last-name');
-    }
-    next();
-});
 exports.userSchema.pre('save', async function (next) {
     this.wasNew = this.isNew;
-    console.log(this.wasNew);
     if (this.isModified('password')) {
         this.password = await (0, hash_1.generateHashing)(this.password);
     }
+    if (this.isModified('confirmEmailOTP')) {
+        this.confirmEmailPlainOTP = this.confirmEmailOTP;
+        this.confirmEmailOTP = await (0, hash_1.generateHashing)(this.confirmEmailOTP);
+    }
     next();
 });
-exports.userSchema.post('save', function (doc, next) {
+exports.userSchema.post('save', async function (doc, next) {
     const that = this;
-    console.log(that.wasNew);
-    if (that.wasNew) {
-        email_event_1.emailEvent.emit('confirmeEmail', { to: this.email, otp: 123456 });
+    if (that.wasNew && that.confirmEmailPlainOTP) {
+        email_event_1.emailEvent.emit('confirmeEmail', { to: this.email,
+            userName: this.userName,
+            otp: that.confirmEmailPlainOTP
+        });
     }
+    next();
 });
 exports.UserModel = mongoose_1.models.User || (0, mongoose_1.model)('User', exports.userSchema);
