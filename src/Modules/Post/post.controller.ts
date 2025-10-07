@@ -8,11 +8,26 @@ import { cloudFileUpload, fileValidation } from "../../Utils/multer/cluod.multer
 import { validation } from "../../Middlewares/validation.middleware";
 const router = Router();
 
-router.post('/',authentication(
-    endPoint.createPost, TokenEnum.ACCESS),
+router.post('/',
+    authentication( endPoint.createPost, TokenEnum.ACCESS),
     cloudFileUpload({validation : fileValidation.images}).array('attachments', 3),
     validation(validators.createPostSchema),
     postService.createPost)
+
+
+router.patch('/:postId/like',
+    authentication(endPoint.createPost, TokenEnum.ACCESS),
+    validation(validators.likeUnlikePostSchema),
+    postService.likeUnlikePost)
+
+router.patch('/:postId',
+    authentication(endPoint.createPost, TokenEnum.ACCESS),
+    cloudFileUpload({validation : fileValidation.images}).array('attachments', 3),
+    validation(validators.updatePostSchema),
+    postService.updatePost)
+
+
+
 
 
 export default router

@@ -28,6 +28,11 @@ exports.userSchema = new mongoose_1.Schema({
     address: String,
     gender: { type: String, enum: Object.values(GenderEnum), default: GenderEnum.MALE },
     role: { type: String, enum: Object.values(RoulEnum), default: RoulEnum.USER },
+    freezedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    freezedAt: Date,
+    restoredBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    restoredAt: Date,
+    friends: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }]
 }, {
     timestamps: true,
     toJSON: {
@@ -64,6 +69,16 @@ exports.userSchema.post('save', async function (doc, next) {
             userName: this.userName,
             otp: that.confirmEmailPlainOTP
         });
+    }
+    next();
+});
+exports.userSchema.pre(['find', 'findOne'], function (next) {
+    const query = this.getQuery();
+    if (query.paranoId === false) {
+        this.setQuery({ ...query });
+    }
+    else {
+        this.setQuery({ ...query, freezedAt: { $exists: false } });
     }
     next();
 });

@@ -34,10 +34,19 @@ export interface IUser {
     gender: GenderEnum;
     role: RoulEnum;
 
+    freezedBy ?: Types.ObjectId,
+    freezedAt ?: Date,
+
+    restoredBy ?: Types.ObjectId,
+    restoredAt ?: Date,
+
     createdAt : Date;
     updatedAt ?: Date;
 
+    friends ?: Types.ObjectId[]
+
 }
+
 export const userSchema = new Schema<IUser>({
     firstName : { type : String, required : true, minLength : 3, maxLength : 25 },
     lastName : { type : String, required : true, minLength : 3, maxLength : 25 },
@@ -56,6 +65,14 @@ export const userSchema = new Schema<IUser>({
     address :  String ,
     gender : { type : String, enum : Object.values(GenderEnum), default : GenderEnum.MALE },
     role : { type : String, enum : Object.values(RoulEnum), default : RoulEnum.USER },
+    
+    freezedBy : { type : Schema.Types.ObjectId, ref : 'User' },
+    freezedAt : Date,
+
+    restoredBy : { type : Schema.Types.ObjectId, ref : 'User' },
+    restoredAt : Date,
+
+    friends : [{ type : Schema.Types.ObjectId, ref : 'User' }]
 
 }, {
     timestamps : true,
@@ -103,6 +120,16 @@ userSchema.post('save', async function(doc,next){
             userName : this.userName, 
             otp : that.confirmEmailPlainOTP
         })
+    }
+    next()
+})
+
+userSchema.pre(['find','findOne'], function(next){
+    const query = this.getQuery();
+    if ( query.paranoId === false ) {
+        this.setQuery({ ...query })
+    } else {
+        this.setQuery({ ...query, freezedAt : { $exists : false} })
     }
     next()
 })

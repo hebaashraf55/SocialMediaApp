@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PostModel = exports.postSchema = exports.AvilabilityEnum = exports.AllowCommentsEnum = void 0;
+exports.PostModel = exports.postSchema = exports.ActionEnum = exports.AvilabilityEnum = exports.AllowCommentsEnum = void 0;
 const mongoose_1 = require("mongoose");
 var AllowCommentsEnum;
 (function (AllowCommentsEnum) {
@@ -13,16 +13,22 @@ var AvilabilityEnum;
     AvilabilityEnum["FRIENDS"] = "FRIENDS";
     AvilabilityEnum["ONLYME"] = "ONLYME";
 })(AvilabilityEnum || (exports.AvilabilityEnum = AvilabilityEnum = {}));
+var ActionEnum;
+(function (ActionEnum) {
+    ActionEnum["LIKE"] = "LIKE";
+    ActionEnum["UNLIKE"] = "UNLIKE";
+})(ActionEnum || (exports.ActionEnum = ActionEnum = {}));
 exports.postSchema = new mongoose_1.Schema({
     content: {
         type: String,
         minLength: 3,
         maxLength: 500000,
         required: function () {
-            return !this.attachment?.length;
+            return !this.attachments?.length;
         }
     },
-    attachment: [String],
+    attachments: [String],
+    assetPostFolderId: String,
     allowComments: {
         type: String,
         enum: Object.values(AllowCommentsEnum),
@@ -48,4 +54,14 @@ exports.postSchema = new mongoose_1.Schema({
     restoredBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     restoredAt: Date
 }, { timestamps: true, });
+exports.postSchema.pre(['find', 'findOne', 'findOneAndUpdate', 'updateOne'], function (next) {
+    const query = this.getQuery();
+    if (query.paranoId === false) {
+        this.setQuery({ ...query });
+    }
+    else {
+        this.setQuery({ ...query, freezedAt: { $exists: false } });
+    }
+    next();
+});
 exports.PostModel = mongoose_1.models.Post || (0, mongoose_1.model)('Post', exports.postSchema);

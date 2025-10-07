@@ -121,14 +121,14 @@ export const decodeToken = async ({ authorization, tokenType = TokenEnum.ACCESS 
         ? signature.refresh_signature 
         : signature.access_signature
     })
-    if(!decoded?._id || !decoded.iat)
+    if (!decoded?._id || !decoded.iat)
         throw new UnAuthorizedException("Invalid Token Payload") 
      
-    if(await tokenModel.findOne({filter : {jti : decoded.jti}}))
+    if (await tokenModel.findOne({ filter : { jti : decoded.jti } }))
         throw new UnAuthorizedException("Invalid Or Old Login Credentials") 
 
     const user = await userModel.findOne({
-        filter : {_id : decoded._id}
+        filter : {_id : decoded._id }
     })
     if(!user) throw new UnAuthorizedException("Not Register Account")
 

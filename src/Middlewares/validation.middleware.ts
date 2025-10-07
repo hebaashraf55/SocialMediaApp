@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 
 type ReqTypeKey = keyof Request;
 type SchemaType = Partial<Record<ReqTypeKey, ZodType>>;
+
 export const validation = (schema:SchemaType) => {
     return (req:Request , res:Response , next:NextFunction ) : NextFunction => {
 
@@ -27,7 +28,6 @@ export const validation = (schema:SchemaType) => {
             req.body.attachments = req.files;
          }
 
-
         const validationResults = schema[key].safeParse(req[key]);
         if (!validationResults.success) {
             const errors = validationResults.error as ZodError
@@ -43,7 +43,6 @@ export const validation = (schema:SchemaType) => {
         }
     }
         return next() as unknown as NextFunction;
-    
     }
 }
 

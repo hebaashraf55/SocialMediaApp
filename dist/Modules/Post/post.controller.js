@@ -46,4 +46,6 @@ const cluod_multer_1 = require("../../Utils/multer/cluod.multer");
 const validation_middleware_1 = require("../../Middlewares/validation.middleware");
 const router = (0, express_1.Router)();
 router.post('/', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), (0, cluod_multer_1.cloudFileUpload)({ validation: cluod_multer_1.fileValidation.images }).array('attachments', 3), (0, validation_middleware_1.validation)(validators.createPostSchema), post_service_1.default.createPost);
+router.patch('/:postId/like', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.likeUnlikePostSchema), post_service_1.default.likeUnlikePost);
+router.patch('/:postId', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), (0, cluod_multer_1.cloudFileUpload)({ validation: cluod_multer_1.fileValidation.images }).array('attachments', 3), (0, validation_middleware_1.validation)(validators.updatePostSchema), post_service_1.default.updatePost);
 exports.default = router;

@@ -10,12 +10,18 @@ export enum AvilabilityEnum {
     ONLYME = 'ONLYME',
 }
 
+export enum ActionEnum {
+    LIKE = 'LIKE',
+    UNLIKE = 'UNLIKE',
+}
+
 export interface IPost{ 
     content ?: string,
-    attachment ?: string[],
+    attachments ?: string[],
+    assetPostFolderId ?: string,
 
-    allowComments?: AllowCommentsEnum,
-    avilability?: AvilabilityEnum,
+    allowComments ?: AllowCommentsEnum,
+    avilability ?: AvilabilityEnum,
 
     tags ?: Types.ObjectId[],
     likes ?: Types.ObjectId[],
@@ -38,9 +44,11 @@ export const postSchema = new Schema<IPost>({
         minLength : 3, 
         maxLength : 500000, 
         required : function(){
-        return !this.attachment?.length
+        return !this.attachments?.length
     } } ,
-    attachment : [String],
+    attachments : [String],
+    assetPostFolderId : String,
+    
     allowComments : { 
         type : String, 
         enum : Object.values(AllowCommentsEnum), 
@@ -67,6 +75,18 @@ export const postSchema = new Schema<IPost>({
     restoredAt : Date
 
 }, {timestamps : true,});
+
+
+postSchema.pre(['find','findOne', 'findOneAndUpdate' , 'updateOne'], function(next){
+    const query = this.getQuery()  
+    if ( query.paranoId === false ) {
+        this.setQuery({ ...query })
+    } else {
+        this.setQuery({ ...query, freezedAt : { $exists : false} })
+    }
+    next()
+})
+
 
 
 

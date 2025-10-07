@@ -5,7 +5,8 @@ import { RoulEnum } from "../DB/Models/User.model"
 
 
 export const authentication = (
-    accesRoles: RoulEnum[] =[], 
+    accesRoles: RoulEnum[] = [], 
+    
     tokenType : TokenEnum = TokenEnum.ACCESS ) => 
         {
     return async ( req : Request, res : Response, next : NextFunction ) => {

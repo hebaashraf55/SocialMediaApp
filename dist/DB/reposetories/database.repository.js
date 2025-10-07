@@ -18,7 +18,19 @@ class DatabaseRepository {
         ;
         return doc.exec();
     }
-    async findOneAndUpdate({ filter, update, options }) {
+    async find({ filter, select, options }) {
+        const doc = this.model.find(filter || {}).select(select || '');
+        if (options?.populate) {
+            doc.populate(options.populate);
+        }
+        ;
+        if (options?.lean) {
+            doc.lean(options.lean);
+        }
+        ;
+        return doc.exec();
+    }
+    async findOneAndUpdate({ filter, update, options = { new: true } }) {
         const doc = this.model.findOneAndUpdate(filter, update);
         if (options?.populate) {
             doc.populate(options.populate);
@@ -49,6 +61,12 @@ class DatabaseRepository {
         return (await this.model.insertMany(data));
     }
     async updateOne({ filter, update, options }) {
+        if (Array.isArray(update)) {
+            update.push({
+                $set: { __v: { $add: ["$__v", 1] } }
+            });
+            return await this.model.updateOne(filter, update, options);
+        }
         return await this.model.updateOne(filter, { ...update, $inc: { __v: 1 } }, options);
     }
     async deleteOne({ filter, }) {

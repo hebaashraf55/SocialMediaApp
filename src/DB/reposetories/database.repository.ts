@@ -31,7 +31,25 @@ export abstract  class DatabaseRepository <TDocument> {
             return doc.exec()
         }
 
-    async findOneAndUpdate({filter, update, options} : { 
+    async find({filter, select, options} : { 
+            filter ?: RootFilterQuery<TDocument> ,
+            select ?: ProjectionType<TDocument> | null,
+            options ?: QueryOptions<TDocument> | null
+         }) : Promise< any | HydratedDocument<TDocument>[] | [] > {
+
+            const doc = this.model.find(filter || {}).select(select || '');
+
+            if(options?.populate) {
+                doc.populate(options.populate as PopulateOptions[])
+            };
+
+            if(options?.lean) {
+                doc.lean(options.lean)
+            };
+            return doc.exec()
+        }
+
+    async findOneAndUpdate({filter, update, options = { new : true }} : { 
             filter : RootFilterQuery<TDocument> ,
             update : UpdateQuery<TDocument>,
             options ?: QueryOptions<TDocument> | null
@@ -89,7 +107,12 @@ export abstract  class DatabaseRepository <TDocument> {
         update : UpdateQuery<TDocument>,
         options ?: MongooseUpdateQueryOptions<TDocument> | null
     }) : Promise <UpdateWriteOpResult> {
-
+        if(Array.isArray(update)) {
+            update.push({
+              $set: { __v: { $add: ["$__v", 1] } }
+            })
+            return await this.model.updateOne(filter, update, options)
+        }
         return await this.model.updateOne(
             filter, 
             { ...update , $inc : { __v :1 } }, 
