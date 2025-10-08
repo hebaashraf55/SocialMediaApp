@@ -7,7 +7,7 @@ import { BadRequestException, NotFoundException } from "../../Utils/response/err
 import { deleteFiles, uploadFiles } from "../../Utils/multer/s3.config";
 import { v4 as uuid } from 'uuid';
 import { LikePostQueryDTO } from "./post.dto";
-import { UpdateQuery } from "mongoose";
+import { Types, UpdateQuery } from "mongoose";
 
 
 export const postAvilability = (req : Request ) => {
@@ -37,7 +37,7 @@ class PostService {
     createPost = async (req : Request,res: Response, next: NextFunction) => {
         if (
             req.body.tags?.length && 
-            await this._userModel.find({ filter : { _id : { $in : req.body.tags} }}).length !== req.body.tags.length
+            (await this._userModel.find({ filter : { _id : { $in : req.body.tags} }})).length !== req.body.tags.length
         ) {
             throw new NotFoundException('Some Mentioned User Does Not Exist')
         }
@@ -101,10 +101,6 @@ class PostService {
     }
 
     updatePost = async (req : Request,res: Response, next: NextFunction) => {
-        console.log("ENTERED updatePost");
-        console.log("REQ.BODY:", req.body);
-        console.log("REQ.FILES:", req.files);
-        delete (req.body as any).attachments; 
 
         const { postId } = req.params as unknown as { postId : string }
 
@@ -114,49 +110,56 @@ class PostService {
 
         if ( !post ) throw new NotFoundException('Post Does Not Exist')
 
-        // await this._postModel.updateOne({
-        //     filter : { _id : postId },
-        //     update : { ...req.body }
-        // })
         if (
             req.body.tags?.length && 
-            (await this._userModel.find({ filter : { _id : { $in : req.body.tags} }}).length !== req.body.tags.length)
+            (await this._userModel.find({ filter : { _id : { $in : req.body.tags} }})).length !== req.body.tags.length
         ) {
             throw new NotFoundException('Some Mentioned User Does Not Exist')
         }
+
         let attachments : string[] = [];
 
         if (req.files?.length) {  
             attachments = await uploadFiles({
+                
                 files : req.files as Express.Multer.File[],
                 path: `users/${post.createdBy}/post/${post.assetPostFolderId}`
             })
-            console.log(attachments);  
         }
-        // update post
+        // update post // aggregation pipline [{},{}]
         const updatedPost = await this._postModel.updateOne({
             filter : { _id : postId },
             update : [ 
                 { 
                 $set : { 
                         content : req.body.content,
-                        allowCmments : req.body.allowCmments || post.allowCmments,
+                        allowComments : req.body.allowComments || post.allowComments,
                         avilability : req.body.avilability || post.avilability,
-
                         attachments : {
                             $setUnion : [
-                                { $setDifference : ['$attachments', req.body.removedAttachments || []]
-                                }, attachments ]
+                                { 
+                                    $setDifference : [
+                                        '$attachments', 
+                                        req.body.removedAttachments || []
+                                    ]
+                                }, attachments 
+                            ]
                            },
-
                         tags : {
                             $setUnion : [
-                                {  $setDifference : ['$tags', req.body.removedTags || []]
-                                }, req.body.tags ]
+                                {  
+                                    $setDifference : [ '$tags', 
+                                        (req.body.removedTags || [])
+                                        .map((tag:string) => { return Types.ObjectId.createFromHexString(tag)}) ]
+                                }, 
+                                (req.body.tags || [])
+                                .map((tag:string) => { return Types.ObjectId.createFromHexString(tag) })
+                             ]
                         }, 
                 } 
             } ]
         })
+
         if(!updatedPost.modifiedCount){
             if(attachments.length){
                 await deleteFiles({ urls : attachments })
@@ -165,11 +168,21 @@ class PostService {
         }  else {
                 if(req.body.removedAttachments?.length){
                     await deleteFiles({ urls : req.body.removedAttachments })
-                    throw new BadRequestException('Fail To Update Post')
                 }
             }
 
         return res.status(200).json({message : ' Done'})
+    }
+
+    getPosts = async (req : Request,res: Response, next: NextFunction) => {
+        let { page , size } = req.query as unknown as { page : number, size : number}
+        const posts = await this._postModel.paginate({
+            filter : {$or : postAvilability(req)},
+            page,
+            size
+        })
+        
+        return res.status(200).json({ message : ' Done', posts })
     }
 
 }

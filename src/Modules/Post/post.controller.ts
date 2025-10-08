@@ -26,6 +26,10 @@ router.patch('/:postId',
     validation(validators.updatePostSchema),
     postService.updatePost)
 
+router.get('/',
+    authentication(endPoint.createPost, TokenEnum.ACCESS),
+    postService.getPosts)
+
 
 
 

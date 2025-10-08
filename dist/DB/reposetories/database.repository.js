@@ -28,7 +28,30 @@ class DatabaseRepository {
             doc.lean(options.lean);
         }
         ;
+        if (options?.limit) {
+            doc.limit(options.limit);
+        }
+        if (options?.skip) {
+            doc.skip(options.skip);
+        }
         return doc.exec();
+    }
+    async paginate({ filter = {}, select = {}, options = {}, page = 1, size = 5 }) {
+        let docsCount = undefined;
+        let pages = undefined;
+        page = Math.floor(page < 1 ? 1 : page);
+        options.limit = Math.floor(size < 1 || !size ? 5 : size);
+        options.skip = (page - 1) * size;
+        docsCount = await this.model.countDocuments(filter);
+        pages = Math.ceil(docsCount / options.limit);
+        const results = await this.find({ filter, select, options });
+        return await {
+            docsCount,
+            pages,
+            limit: options.limit,
+            currentPage: page,
+            results
+        };
     }
     async findOneAndUpdate({ filter, update, options = { new: true } }) {
         const doc = this.model.findOneAndUpdate(filter, update);
@@ -63,7 +86,9 @@ class DatabaseRepository {
     async updateOne({ filter, update, options }) {
         if (Array.isArray(update)) {
             update.push({
-                $set: { __v: { $add: ["$__v", 1] } }
+                $set: {
+                    __v: { $add: ["$__v", 1] }
+                }
             });
             return await this.model.updateOne(filter, update, options);
         }
