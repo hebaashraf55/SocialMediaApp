@@ -6,7 +6,12 @@ import { endPoint } from "./post.authorization";
 import { TokenEnum } from "../../Utils/security/token";
 import { cloudFileUpload, fileValidation } from "../../Utils/multer/cluod.multer";
 import { validation } from "../../Middlewares/validation.middleware";
-const router = Router();
+import commentRouter from "../Comment/comment.controller";
+const router : Router = Router();
+
+
+router.use('/:postId/comment', commentRouter) // child router for post router
+
 
 router.post('/',
     authentication( endPoint.createPost, TokenEnum.ACCESS),

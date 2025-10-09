@@ -37,18 +37,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const post_service_1 = __importDefault(require("./post.service"));
-const validators = __importStar(require("./post.validation"));
+const comment_service_1 = __importDefault(require("./comment.service"));
 const authentication_middleware_1 = require("../../Middlewares/authentication.middleware");
-const post_authorization_1 = require("./post.authorization");
 const token_1 = require("../../Utils/security/token");
-const cluod_multer_1 = require("../../Utils/multer/cluod.multer");
+const comment_authorization_1 = require("./comment.authorization");
 const validation_middleware_1 = require("../../Middlewares/validation.middleware");
-const comment_controller_1 = __importDefault(require("../Comment/comment.controller"));
-const router = (0, express_1.Router)();
-router.use('/:postId/comment', comment_controller_1.default);
-router.post('/', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), (0, cluod_multer_1.cloudFileUpload)({ validation: cluod_multer_1.fileValidation.images }).array('attachments', 3), (0, validation_middleware_1.validation)(validators.createPostSchema), post_service_1.default.createPost);
-router.patch('/:postId/like', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.likeUnlikePostSchema), post_service_1.default.likeUnlikePost);
-router.patch('/:postId', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), (0, cluod_multer_1.cloudFileUpload)({ validation: cluod_multer_1.fileValidation.images }).array('attachments', 3), (0, validation_middleware_1.validation)(validators.updatePostSchema), post_service_1.default.updatePost);
-router.get('/', (0, authentication_middleware_1.authentication)(post_authorization_1.endPoint.createPost, token_1.TokenEnum.ACCESS), post_service_1.default.getPosts);
+const validators = __importStar(require("./comment.validation"));
+const cluod_multer_1 = require("../../Utils/multer/cluod.multer");
+const router = (0, express_1.Router)({
+    mergeParams: true
+});
+router.post('/', (0, authentication_middleware_1.authentication)(comment_authorization_1.endPoint.createComment, token_1.TokenEnum.ACCESS), (0, cluod_multer_1.cloudFileUpload)({ validation: cluod_multer_1.fileValidation.images }).array('attachments', 3), (0, validation_middleware_1.validation)(validators.createCommentSchema), comment_service_1.default.createComment);
+router.post('/:commentId/reply', (0, authentication_middleware_1.authentication)(comment_authorization_1.endPoint.createReply, token_1.TokenEnum.ACCESS), (0, cluod_multer_1.cloudFileUpload)({ validation: cluod_multer_1.fileValidation.images }).array('attachments', 3), (0, validation_middleware_1.validation)(validators.createReplySchema), comment_service_1.default.createReply);
 exports.default = router;
