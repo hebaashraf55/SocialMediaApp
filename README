@@ -1,0 +1,93 @@
+
+# 🗨️ Social Media App
+
+A **real-time chat application** for friends built with **Node.js**, **Express**, **MongoDB**, **Socket.io**, and **JWT Authentication**.  
+This project provides a strong backend architecture featuring **authentication**, **middleware**, **gateway**, and **validation layers**, with **AWS S3 integration** for file storage.
+
+---
+
+## 🚀 Features
+
+- 🔐 **Authentication & Authorization** using **JWT**  
+- 🧩 **Modular Middleware System** for request validation and security  
+- 💬 **Real-Time Communication** with **Socket.io**  
+- 🧾 **Data Validation** using **Joi**  
+- ☁️ **AWS S3 Integration** for storing media and assets  
+- 🗄️ **MongoDB** as the primary database  
+- 🧱 **Scalable Project Structure** built around controllers, services, and models  
+- 🛡️ **Security Enhancements** with best practices and error handling
+
+---
+
+## ⚙️ Installation & Setup
+
+Follow these steps to set up the project locally:
+
+```bash
+# 1️⃣ Clone the repository
+git clone https://github.com/hebaashraf55/social-media-app.git
+
+# 2️⃣ Navigate into the project folder
+cd social-media-app
+
+# 3️⃣ Install dependencies
+npm install
+
+# 4️⃣ Create a .env file and add your environment variables
+# Example:
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+AWS_ACCESS_KEY_ID=your_aws_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret
+AWS_BUCKET_NAME=your_bucket_name
+
+# 5️⃣ Run the server
+npm run dev
+
+
+(🗂️ Folder Structure)
+src/
+│
+├── db/                     # Database connection files
+├── models/                 # Shared mongoose models
+├── auth/                   # Authentication module
+│   ├── controller.js
+│   ├── service.js
+│
+├── user/                   # User-related APIs
+│   ├── controller.js
+│   ├── service.js
+│
+├── post/                   # Posts-related APIs
+│   ├── controller.js
+│   ├── service.js
+│
+├── socket/                 # Socket.io events and gateway setup
+│
+├── middlewares/            # Global middlewares and validation logic
+│
+├── utils/                  # Helper functions and constants
+│
+└── index.js                # App entry point
+
+```
+
+------------------------------------------------------------------------------
+
+🔮 Future Improvements
+📱 Add notifications for friend requests and messages
+🧑‍🤝‍🧑 Implement group chat and user presence indicators
+🖼️ Add media preview for uploaded images or videos
+🌍 Integrate real-time typing indicators
+🔍 Enhance search and filtering features
+🧠 Add caching with Redis for performance optimization
+
+---------------------------------------------------------------------------------
+
+🧑‍💻 Author
+Heba Ashraf Ibrahim Noufal
+📧 hebaashraf81@gmail.com
+🔗 GitHub Profile
+
+--------------------------------------------------------------------------------
