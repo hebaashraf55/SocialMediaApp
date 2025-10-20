@@ -6,12 +6,24 @@ const user_repository_1 = require("../../DB/reposetories/user.repository");
 const friend_repository_1 = require("../../DB/reposetories/friend.repository");
 const friendRequest_model_1 = require("../../DB/Models/friendRequest.model");
 const error_response_1 = require("../../Utils/response/error.response");
+const chat_model_1 = require("../../DB/Models/chat.model");
+const chat_repository_1 = require("../../DB/reposetories/chat.repository");
 class UserService {
     _userModel = new user_repository_1.UserRepository(User_model_1.UserModel);
     _friendModel = new friend_repository_1.FriendRepository(friendRequest_model_1.FriendModel);
+    _chatModel = new chat_repository_1.ChatRepository(chat_model_1.ChatModel);
     constructor() { }
     getProfile = async (req, res, next) => {
-        return res.status(200).json({ message: ' Done', user: req.user, decoded: req.decoded });
+        await req.user?.populate('friends');
+        const groups = await this._chatModel.find({
+            filter: {
+                participants: { $in: req.user?._id },
+                group: { $exists: true }
+            }
+        });
+        return res
+            .status(200)
+            .json({ message: ' Done', user: req.user, decoded: req.decoded, groups });
     };
     logOut = async (req, res) => {
         const { flag } = req.body;

@@ -5,8 +5,11 @@ import { authentication } from '../../Middlewares/authentication.middleware';
 import { TokenEnum } from '../../Utils/security/token';
 import * as validators from './user.validation';
 import { validation } from '../../Middlewares/validation.middleware';
+import chatRouter from '../Chat/chat.controller';
 
 const router = Router();
+
+router.use('/:userId/chat', chatRouter);
 
 router.get('/profile', 
     authentication(endPoint.profile), 

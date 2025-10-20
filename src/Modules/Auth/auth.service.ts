@@ -44,14 +44,15 @@ class AuthenticationService {
         return res.status(201).json({message : ' User Created Successfully', user})
     }
 
+
     logIn = async (req : Request ,res : Response) : Promise <Response> => {
         const { email, password } = req.body;
 
-        const user = await this._userModel.findOne({
-            filter : {email},
-        });
+        const user = await this._userModel.findOne({ filter : { email } });
 
-        if(!user) throw new NotFoundException('invalid Account')
+        if(!user) { 
+            throw new NotFoundException('invalid Account')}
+
         if(!compareHashing(password, user .password)) 
             throw new BadRequestException('invalid password')
 
@@ -59,7 +60,7 @@ class AuthenticationService {
         
 
         return res.status(200).json({
-            message : ' User Loged in Successfully', 
+            message : 'User Loged in Successfully', 
             criedentials
         })
     }

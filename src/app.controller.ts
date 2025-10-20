@@ -9,11 +9,13 @@ config({ path: path.resolve('./config/.env.dev')});
 import authRouter from './Modules/Auth/auth.controller';
 import userRouter from './Modules/User/user.controller';
 import postRouter from './Modules/Post/post.controller';
+import chatRouter from './Modules/Chat/chat.controller';
 import { BadRequestException, globalErrorHandler } from './Utils/response/error.response';
 import connectDB  from './DB/connection'
 import { createGetPreSignedURL, deleteFile, deleteFiles, getFile } from './Utils/multer/s3.config';
 import { promisify } from 'node:util';
 import { pipeline } from 'node:stream';
+import { initalize } from './Modules/gateway/gateway';
 const createS3WriteStreamPipe = promisify(pipeline);
 
 
@@ -97,11 +99,18 @@ export const bootstrap = async () : Promise<void> => {
     app.use('/api/auth', authRouter);
     app.use('/api/user', userRouter);
     app.use('/api/post', postRouter);
+    app.use('/api/chat', chatRouter)
 
 
     app.use(globalErrorHandler);
 
 
 
-    app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+   const httpServer = app.listen(port, () => {
+       console.log(`Example app listening on port ${port}!`)
+   });
+
+   initalize(httpServer)
+
 }

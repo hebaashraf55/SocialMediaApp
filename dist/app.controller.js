@@ -14,11 +14,13 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
 const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
 const post_controller_1 = __importDefault(require("./Modules/Post/post.controller"));
+const chat_controller_1 = __importDefault(require("./Modules/Chat/chat.controller"));
 const error_response_1 = require("./Utils/response/error.response");
 const connection_1 = __importDefault(require("./DB/connection"));
 const s3_config_1 = require("./Utils/multer/s3.config");
 const node_util_1 = require("node:util");
 const node_stream_1 = require("node:stream");
+const gateway_1 = require("./Modules/gateway/gateway");
 const createS3WriteStreamPipe = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -79,7 +81,11 @@ const bootstrap = async () => {
     app.use('/api/auth', auth_controller_1.default);
     app.use('/api/user', user_controller_1.default);
     app.use('/api/post', post_controller_1.default);
+    app.use('/api/chat', chat_controller_1.default);
     app.use(error_response_1.globalErrorHandler);
-    app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+    const httpServer = app.listen(port, () => {
+        console.log(`Example app listening on port ${port}!`);
+    });
+    (0, gateway_1.initalize)(httpServer);
 };
 exports.bootstrap = bootstrap;

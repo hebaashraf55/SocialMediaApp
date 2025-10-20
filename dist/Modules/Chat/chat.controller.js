@@ -37,18 +37,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const user_service_1 = __importDefault(require("./user.service"));
-const user_authorization_1 = require("./user.authorization");
 const authentication_middleware_1 = require("../../Middlewares/authentication.middleware");
+const chat_authorization_1 = require("./chat.authorization");
 const token_1 = require("../../Utils/security/token");
-const validators = __importStar(require("./user.validation"));
 const validation_middleware_1 = require("../../Middlewares/validation.middleware");
-const chat_controller_1 = __importDefault(require("../Chat/chat.controller"));
-const router = (0, express_1.Router)();
-router.use('/:userId/chat', chat_controller_1.default);
-router.get('/profile', (0, authentication_middleware_1.authentication)(user_authorization_1.endPoint.profile), user_service_1.default.getProfile);
-router.post('/logout', (0, authentication_middleware_1.authentication)(user_authorization_1.endPoint.logout), user_service_1.default.logOut);
-router.post('/refresh-token', (0, authentication_middleware_1.authentication)(user_authorization_1.endPoint.refreshtoken, token_1.TokenEnum.ACCESS), user_service_1.default.refreshToken);
-router.post('/:userId/friend-request', (0, authentication_middleware_1.authentication)(user_authorization_1.endPoint.friendRequest, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.sendFriendRequestSchema), user_service_1.default.friendRequest);
-router.patch('/:requestId/accept', (0, authentication_middleware_1.authentication)(user_authorization_1.endPoint.accepFriend, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.acceptFriendRequestSchema), user_service_1.default.acceptFriend);
+const validators = __importStar(require("./chat.validation"));
+const chat_service_1 = __importDefault(require("./chat.service"));
+const router = (0, express_1.Router)({
+    mergeParams: true
+});
+router.get('/', (0, authentication_middleware_1.authentication)(chat_authorization_1.endPoint.getChat, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.getChatSchema), chat_service_1.default.getChat);
+router.post('/group', (0, authentication_middleware_1.authentication)(chat_authorization_1.endPoint.getChat, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.createGroupChatSchema), chat_service_1.default.createGroupChat);
+router.get('/group/:groupId', (0, authentication_middleware_1.authentication)(chat_authorization_1.endPoint.getChat, token_1.TokenEnum.ACCESS), (0, validation_middleware_1.validation)(validators.getGroupChatSchema), chat_service_1.default.getGroupChat);
 exports.default = router;

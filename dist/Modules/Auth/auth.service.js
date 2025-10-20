@@ -37,16 +37,15 @@ class AuthenticationService {
     };
     logIn = async (req, res) => {
         const { email, password } = req.body;
-        const user = await this._userModel.findOne({
-            filter: { email },
-        });
-        if (!user)
+        const user = await this._userModel.findOne({ filter: { email } });
+        if (!user) {
             throw new error_response_1.NotFoundException('invalid Account');
+        }
         if (!(0, hash_1.compareHashing)(password, user.password))
             throw new error_response_1.BadRequestException('invalid password');
         const criedentials = await (0, token_1.createLoginCredentials)(user);
         return res.status(200).json({
-            message: ' User Loged in Successfully',
+            message: 'User Loged in Successfully',
             criedentials
         });
     };

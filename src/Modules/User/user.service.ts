@@ -8,17 +8,29 @@ import { JwtPayload } from 'jsonwebtoken';
 import { FriendRepository } from '../../DB/reposetories/friend.repository';
 import { FriendModel } from '../../DB/Models/friendRequest.model';
 import { BadRequestException, ConfilectException, NotFoundException } from '../../Utils/response/error.response';
+import { ChatModel } from '../../DB/Models/chat.model';
+import { ChatRepository } from '../../DB/reposetories/chat.repository';
 
 
 class UserService {
     private _userModel = new UserRepository(UserModel)
     private _friendModel = new FriendRepository(FriendModel)
+    private _chatModel = new ChatRepository(ChatModel)
 
     constructor() {}
 
        getProfile = async (req : Request, res : Response, next : NextFunction) :Promise<Response> => {
+            await req.user?.populate('friends')
 
-            return res.status(200).json({message : ' Done', user: req.user , decoded : req.decoded})
+            const groups = await this._chatModel.find({
+                filter : {
+                    participants : { $in : req.user?._id as Types.ObjectId },
+                    group : { $exists : true }
+                }
+            })
+            return res
+            .status(200)
+            .json({message : ' Done', user: req.user , decoded : req.decoded, groups})
         }
 
         logOut = async (req : Request, res : Response) : Promise<Response> => {

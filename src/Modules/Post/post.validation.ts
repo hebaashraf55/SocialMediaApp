@@ -58,7 +58,8 @@ export const updatePostSchema = {
                 message : "Tags Provide unique tags"
             })
         }
-         if( data.removedTags?.length && data.removedTags.length !== [...new Set(data.removedTags)].length){
+         if( data.removedTags?.length 
+            && data.removedTags.length !== [...new Set(data.removedTags)].length){
             ctx.addIssue({
                 code : "custom",
                 path : ["removedTags"],
