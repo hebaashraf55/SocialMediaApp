@@ -21,6 +21,8 @@ const s3_config_1 = require("./Utils/multer/s3.config");
 const node_util_1 = require("node:util");
 const node_stream_1 = require("node:stream");
 const gateway_1 = require("./Modules/gateway/gateway");
+const express_2 = require("graphql-http/lib/use/express");
+const mainSchema_gql_1 = __importDefault(require("./graphql/mainSchema.gql"));
 const createS3WriteStreamPipe = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -36,6 +38,7 @@ const bootstrap = async () => {
     app.use((0, cors_1.default)(), express_1.default.json(), (0, helmet_1.default)());
     app.use(limiter);
     await (0, connection_1.default)();
+    app.all('/graphql', (0, express_2.createHandler)({ schema: mainSchema_gql_1.default }));
     app.get('/users', (req, res) => {
         return res.status(200).json({ message: ' hello from express with typescript' });
     });

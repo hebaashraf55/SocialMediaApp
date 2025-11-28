@@ -16,6 +16,9 @@ import { createGetPreSignedURL, deleteFile, deleteFiles, getFile } from './Utils
 import { promisify } from 'node:util';
 import { pipeline } from 'node:stream';
 import { initalize } from './Modules/gateway/gateway';
+import { createHandler } from 'graphql-http/lib/use/express';
+import  mainSchema from './graphql/mainSchema.gql';
+
 const createS3WriteStreamPipe = promisify(pipeline);
 
 
@@ -38,6 +41,8 @@ export const bootstrap = async () : Promise<void> => {
     app.use(limiter);
 
     await connectDB();
+
+    app.all('/graphql', createHandler({ schema : mainSchema })); // graphQl
 
     app.get('/users', (req : Request , res : Response) => {
         return res.status(200).json({message : ' hello from express with typescript'})
